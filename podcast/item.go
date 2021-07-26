@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Item is the item (episode) of Podcast
 type Item struct {
 	Title       string               `json:"title,omitempty"`
 	SafeTitle   string               `json:"safeTitle,omitempty"`
@@ -15,6 +16,7 @@ type Item struct {
 	Enclosures  []*Enclosure         `json:"enclosures,omitempty"`
 }
 
+// ITunesItemExtension is the extension fields of Podcast items
 type ITunesItemExtension struct {
 	Author   string `json:"author,omitempty"`
 	Subtitle string `json:"subtitle,omitempty"`
@@ -23,6 +25,8 @@ type ITunesItemExtension struct {
 	Order    string `json:"order,omitempty"`
 }
 
+// GetItemDownloadDestDir returns item download destination dir
+// item download destination dir = Podcast download destination dir + episode title
 func (i *Item) GetItemDownloadDestDir(podcastDir string) string {
 	return path.Join(podcastDir, i.SafeTitle)
 }
