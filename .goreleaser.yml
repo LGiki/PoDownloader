@@ -1,0 +1,31 @@
+project_name: podownloader
+
+env:
+  - CGO_ENABLED=0
+
+builds:
+  - main: ./cmd
+    binary: podownloader
+    goos:
+      - windows
+      - darwin
+      - linux
+      - freebsd
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    flags:
+      - -trimpath
+    ignore:
+      - goos: freebsd
+        goarch: arm64
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Tag }}"
+
+changelog:
+  sort: asc
