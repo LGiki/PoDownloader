@@ -110,11 +110,11 @@ func GetFileSize(path string) (int64, error) {
 }
 
 func Mkdir(path string) error {
-	return os.Mkdir(path, os.ModeDir)
+	return os.Mkdir(path, 0755)
 }
 
 func MkdirAll(path string) error {
-	return os.MkdirAll(path, os.ModeDir)
+	return os.MkdirAll(path, 0755)
 }
 
 func EnsureDir(path string) error {
