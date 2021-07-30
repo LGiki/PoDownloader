@@ -46,7 +46,7 @@ var extensionNames = []string{
 // Remove invalid characters in filename
 // See also: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 func SanitizeFileName(fileName string) string {
-	fileName = regexp.MustCompile(`[:/<>\:"\\|?*]`).ReplaceAllString(fileName, "")
+	fileName = regexp.MustCompile(`[:/<>"\\|?*]`).ReplaceAllString(fileName, "")
 	fileName = regexp.MustCompile(`\s+`).ReplaceAllString(fileName, " ")
 	return fileName
 }
