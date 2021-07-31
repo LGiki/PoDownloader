@@ -44,7 +44,7 @@ func GetPodcastRSSList() ([]string, error) {
 		log.Println(fmt.Sprintf("Load podcast RSS links from RSS list file: %s", RSSListFilePath))
 		return util.GetRSSListByTextFile(RSSListFilePath)
 	} else if RSS != "" {
-		log.Println(fmt.Sprintf("Load podcast RSS link from RSS: %s", RSS))
+		log.Println(fmt.Sprintf("Load podcast from RSS: %s", RSS))
 		return []string{RSS}, nil
 	}
 	return nil, errors.New("")
