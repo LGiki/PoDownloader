@@ -85,6 +85,14 @@ func main() {
 
 	log.Println("Start download")
 	downloadQueue := podownloader.NewDownloadQueueFromDownloadTasks(podcastDownloadTaskIterator.PodcastDownloadTasks)
-	downloadQueue.StartDownload(HTTPClient, ThreadCount)
+	failedTaskDestPaths := downloadQueue.StartDownload(HTTPClient, ThreadCount)
 	log.Println("Download finished")
+
+	// Print failed tasks
+	if len(failedTaskDestPaths) > 0 {
+		fmt.Println(fmt.Sprintf("%d file(s) download failed:", len(failedTaskDestPaths)))
+		for index, failedTaskDestPath := range failedTaskDestPaths {
+			fmt.Println(fmt.Sprintf("%d. %s", index+1, failedTaskDestPath))
+		}
+	}
 }

@@ -82,27 +82,34 @@ func (dq *DownloadQueue) IsEmpty() bool {
 }
 
 // download performs a download task and will start a download goroutine if the download queue is not empty
-func download(doneWg *sync.WaitGroup, progressBar *mpb.Progress, httpClient *http.Client, downloadQueue *DownloadQueue, task interface{}) {
+func (dq *DownloadQueue) download(doneWg *sync.WaitGroup, progressBar *mpb.Progress, httpClient *http.Client, failedFilePathChan chan<- string, task interface{}) {
 	defer doneWg.Done()
+	failedFilePath := ""
 	if urlDownloadTask, ok := task.(*URLDownloadTask); ok {
 		err := urlDownloadTask.DownloadWithProgress(httpClient, progressBar)
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to download %s: %s", urlDownloadTask.URL, err))
+			failedFilePath = urlDownloadTask.Dest
 		}
 	} else if textSaveTask, ok := task.(*TextSaveTask); ok {
 		err := textSaveTask.SaveWithProgress(progressBar)
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to save %s: %s", textSaveTask.Dest, err))
+			failedFilePath = textSaveTask.Dest
 		}
 	}
-	newTask, err := downloadQueue.DeQueue()
+	failedFilePathChan <- failedFilePath
+	newTask, err := dq.DeQueue()
 	if err == nil {
-		go download(doneWg, progressBar, httpClient, downloadQueue, newTask)
+		go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, newTask)
 	}
 }
 
 // StartDownload will start ThreadCount download goroutines to perform download task
-func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int) {
+func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int) []string {
+	var failedTaskDestPaths []string
+	failedFilePathChan := make(chan string)
+	taskCount := dq.Length()
 	doneWg := new(sync.WaitGroup)
 	doneWg.Add(dq.Length())
 	progressBar := mpb.New(
@@ -111,8 +118,15 @@ func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int)
 	for i := 0; i < ThreadCount; i++ {
 		task, err := dq.DeQueue()
 		if err == nil {
-			go download(doneWg, progressBar, httpClient, dq, task)
+			go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, task)
+		}
+	}
+	for i := 0; i < taskCount; i++ {
+		failedFilePath := <-failedFilePathChan
+		if failedFilePath != "" {
+			failedTaskDestPaths = append(failedTaskDestPaths, failedFilePath)
 		}
 	}
 	progressBar.Wait()
+	return failedTaskDestPaths
 }
