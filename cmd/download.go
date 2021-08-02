@@ -47,7 +47,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&rss, "rss", "r", "", "Podcast RSS URL")
 	downloadCmd.Flags().StringVarP(&outputFolder, "output", "o", "podcast", "Download destination folder")
 	downloadCmd.Flags().StringVarP(&userAgent, "ua", "u", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36", "User Agent")
-	downloadCmd.Flags().StringVarP(&configFilePath, "config", "c", "", "Configuration file (default is $PWD/.podownloader.json)")
+	downloadCmd.Flags().StringVarP(&configFilePath, "config", "c", "", "Configuration file (default is $PWD/.podownloader)")
 	downloadCmd.Flags().IntVarP(&threadCount, "thread", "t", 3, "Download threads")
 
 	// Define configuration file keys
