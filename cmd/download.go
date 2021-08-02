@@ -62,8 +62,8 @@ func init() {
 	viper.SetDefault("thread", 3)
 }
 
-// GetPodcastRSSList returns podcast rss URLs list parsed from OPML file, RSS list file or RSS argument
-func GetPodcastRSSList() ([]string, error) {
+// getPodcastRSSList returns podcast rss URLs list parsed from OPML file, RSS list file or RSS argument
+func getPodcastRSSList() ([]string, error) {
 	if opmlFilePath != "" {
 		log.Println(fmt.Sprintf("Load podcast RSS links from OPML file: %s", opmlFilePath))
 		var (
@@ -96,7 +96,7 @@ func download(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 		os.Exit(1)
 	}
-	podcastRSSList, err := GetPodcastRSSList()
+	podcastRSSList, err := getPodcastRSSList()
 	if err != nil {
 		log.Fatalln("Can not load RSS list:", err)
 	}
@@ -177,6 +177,7 @@ func initConfig() {
 	log.Println("OPML file path:", opmlFilePath)
 	log.Println("RSS:", rss)
 	log.Println("Output folder:", outputFolder)
+	log.Println("User agent:", userAgent)
 	log.Println("Thread count:", threadCount)
 
 	// Exit when no required configuration items in the configuration file
