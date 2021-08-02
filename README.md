@@ -8,7 +8,7 @@ This tool will download podcast RSS, podcast cover image, episode audio files, e
 
 # Screenshot
 
-![](screenshot/screenshot.png)
+![](https://raw.githubusercontent.com/LGiki/PoDownloader/master/screenshot/screenshot.png)
 
 # Install
 
@@ -124,7 +124,7 @@ An example of a configuration file in JSON format is as follows:
 }
 ```
 
-You can find more configuration file templates in [config_template](./config_template) folder.
+You can find more configuration file templates in [config_template](https://github.com/LGiki/PoDownloader/tree/master/config_template) folder.
 
 # Download folder structure
 
@@ -159,4 +159,3 @@ podcast
 # License
 
 [Apache-2.0](https://github.com/LGiki/PoDownloader/blob/master/LICENSE)
-
