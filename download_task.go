@@ -51,7 +51,7 @@ func (t *TextSaveTask) Save() error {
 
 // SaveWithProgress writes TextSaveTask.Text to TextSaveTask.Dest with progress bar
 func (t *TextSaveTask) SaveWithProgress(progressBar *mpb.Progress) error {
-	taskName := fmt.Sprintf("[Download | %s]", util.FillTextToLength(t.JobType, 9))
+	taskName := fmt.Sprintf("[Download|%s]", util.FillTextToLength(t.JobType, 9))
 	bar := progressBar.AddBar(
 		1,
 		mpb.PrependDecorators(
@@ -103,7 +103,7 @@ func (c *URLDownloadTask) DownloadWithProgress(httpClient *http.Client, progress
 		return err
 	}
 	defer out.Close()
-	taskName := fmt.Sprintf("[Download | %s]", util.FillTextToLength(c.JobType, 9))
+	taskName := fmt.Sprintf("[Download|%s]", util.FillTextToLength(c.JobType, 9))
 	bar := progressBar.AddBar(
 		resp.ContentLength,
 		mpb.PrependDecorators(
