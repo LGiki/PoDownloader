@@ -51,12 +51,12 @@ func init() {
 	downloadCmd.Flags().IntVarP(&threadCount, "thread", "t", 3, "Download threads")
 
 	// Define configuration file keys
-	viper.BindPFlag("list", rootCmd.Flags().Lookup("list"))
-	viper.BindPFlag("opml", rootCmd.Flags().Lookup("opml"))
-	viper.BindPFlag("rss", rootCmd.Flags().Lookup("rss"))
-	viper.BindPFlag("output", rootCmd.Flags().Lookup("output"))
-	viper.BindPFlag("ua", rootCmd.Flags().Lookup("ua"))
-	viper.BindPFlag("thread", rootCmd.Flags().Lookup("thread"))
+	_ = viper.BindPFlag("list", rootCmd.Flags().Lookup("list"))
+	_ = viper.BindPFlag("opml", rootCmd.Flags().Lookup("opml"))
+	_ = viper.BindPFlag("rss", rootCmd.Flags().Lookup("rss"))
+	_ = viper.BindPFlag("output", rootCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("ua", rootCmd.Flags().Lookup("ua"))
+	_ = viper.BindPFlag("thread", rootCmd.Flags().Lookup("thread"))
 	viper.SetDefault("output", "podcast")
 	viper.SetDefault("ua", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36")
 	viper.SetDefault("thread", 3)
@@ -89,7 +89,7 @@ func getPodcastRSSList() ([]string, error) {
 	return nil, errors.New("")
 }
 
-func download(cmd *cobra.Command, args []string) {
+func download(cmd *cobra.Command, _ []string) {
 	if opmlFilePath == "" && rssListFilePath == "" && rss == "" {
 		fmt.Println("Please specify at least one parameter among opml, list and rss")
 		fmt.Println()
@@ -128,7 +128,7 @@ func download(cmd *cobra.Command, args []string) {
 		podcastDownloadTasks = append(podcastDownloadTasks, tasks)
 	}
 	podcastDownloadTaskIterator := podownloader.NewDownloadTaskIterator(podcastDownloadTasks)
-	podcastDownloadTaskIterator.RemoveDownloadedTaskAndMakeDir(threadCount)
+	podcastDownloadTaskIterator.RemoveDownloadedTask(threadCount)
 
 	log.Println("Start download")
 	downloadQueue := podownloader.NewDownloadQueueFromDownloadTasks(podcastDownloadTaskIterator.PodcastDownloadTasks)

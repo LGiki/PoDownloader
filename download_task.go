@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 // URLDownloadTask is a download task that download a file from URL to Dest
@@ -51,6 +52,11 @@ func (t *TextSaveTask) Save() error {
 
 // SaveWithProgress writes TextSaveTask.Text to TextSaveTask.Dest with progress bar
 func (t *TextSaveTask) SaveWithProgress(progressBar *mpb.Progress) error {
+	destBaseDir := filepath.Dir(t.Dest)
+	err := util.EnsureDirAll(destBaseDir)
+	if err != nil {
+		return err
+	}
 	taskName := fmt.Sprintf("[Download|%s]", util.FillTextToLength(t.JobType, 9))
 	bar := progressBar.AddBar(
 		1,
@@ -62,7 +68,7 @@ func (t *TextSaveTask) SaveWithProgress(progressBar *mpb.Progress) error {
 			decor.Percentage(decor.WC{W: 5}),
 		),
 	)
-	err := util.WriteFile(t.Text, t.Dest)
+	err = util.WriteFile(t.Text, t.Dest)
 	if err != nil {
 		return err
 	}
@@ -93,6 +99,11 @@ func (c *URLDownloadTask) Download(httpClient *http.Client) error {
 
 // DownloadWithProgress downloads URLDownloadTask.URL to URLDownloadTask.Dest with progress bar
 func (c *URLDownloadTask) DownloadWithProgress(httpClient *http.Client, progressBar *mpb.Progress) error {
+	destBaseDir := filepath.Dir(c.Dest)
+	err := util.EnsureDirAll(destBaseDir)
+	if err != nil {
+		return err
+	}
 	resp, err := httpClient.Get(c.URL)
 	if err != nil {
 		return err
@@ -157,9 +168,9 @@ func (p *PodcastDownloadTask) Mkdir() error {
 	return util.EnsureDirAll(p.BaseDestDir)
 }
 
-// RemoveDownloadedTaskAndMakeDirWithProgress removes all downloaded tasks from PodcastDownloadTask
+// RemoveDownloadedTaskWithProgress removes all downloaded tasks from PodcastDownloadTask
 // and creates podcast download destination directory with progress bar
-func (p *PodcastDownloadTask) RemoveDownloadedTaskAndMakeDirWithProgress(progressBar *mpb.Progress) {
+func (p *PodcastDownloadTask) RemoveDownloadedTaskWithProgress(progressBar *mpb.Progress) {
 	taskName := "[Check]"
 	job := p.PodcastTitle
 	bar := progressBar.AddBar(
@@ -171,13 +182,8 @@ func (p *PodcastDownloadTask) RemoveDownloadedTaskAndMakeDirWithProgress(progres
 		),
 		mpb.AppendDecorators(decor.Percentage(decor.WC{W: 5})),
 	)
-	err := p.Mkdir()
-	if err != nil {
-		return
-	}
 	p.RemoveDownloadedTask()
-	for index, _ := range p.EpisodeDownloadTasks {
-		p.EpisodeDownloadTasks[index].Mkdir()
+	for index := range p.EpisodeDownloadTasks {
 		p.EpisodeDownloadTasks[index].RemoveDownloadedTask()
 		bar.IncrBy(1)
 	}

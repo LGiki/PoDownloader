@@ -40,28 +40,28 @@ func (dti *DownloadTaskIterator) Next() *PodcastDownloadTask {
 	}
 }
 
-// startRemoveDownloadedTaskAndMakeDir calls PodcastDownloadTask.RemoveDownloadedTaskAndMakeDirWithProgress
-// to remove downloaded task and make podcast download destination directory
-// and will start a startRemoveDownloadedTaskAndMakeDir goroutine if the iterator has next item
-func startRemoveDownloadedTaskAndMakeDir(doneWg *sync.WaitGroup, progressBar *mpb.Progress, task *PodcastDownloadTask, downloadTaskIterator *DownloadTaskIterator) {
+// startRemoveDownloadedTask calls PodcastDownloadTask.RemoveDownloadedTaskWithProgress
+// to remove downloaded task and will start a startRemoveDownloadedTask goroutine
+// if the iterator has next item
+func startRemoveDownloadedTask(doneWg *sync.WaitGroup, progressBar *mpb.Progress, task *PodcastDownloadTask, downloadTaskIterator *DownloadTaskIterator) {
 	defer doneWg.Done()
-	task.RemoveDownloadedTaskAndMakeDirWithProgress(progressBar)
+	task.RemoveDownloadedTaskWithProgress(progressBar)
 	newTask := downloadTaskIterator.Next()
 	if newTask != nil {
-		go startRemoveDownloadedTaskAndMakeDir(doneWg, progressBar, newTask, downloadTaskIterator)
+		go startRemoveDownloadedTask(doneWg, progressBar, newTask, downloadTaskIterator)
 	}
 }
 
-// RemoveDownloadedTaskAndMakeDir will start ThreadCount startRemoveDownloadedTaskAndMakeDir goroutines to remove
-// downloaded tasks and create podcast download destination directory
-func (dti *DownloadTaskIterator) RemoveDownloadedTaskAndMakeDir(ThreadCount int) {
+// RemoveDownloadedTask will start ThreadCount startRemoveDownloadedTask goroutines to remove
+// downloaded tasks
+func (dti *DownloadTaskIterator) RemoveDownloadedTask(ThreadCount int) {
 	doneWg := new(sync.WaitGroup)
 	doneWg.Add(dti.GetLeftLength())
 	progressBar := mpb.New(mpb.WithWaitGroup(doneWg))
 	for i := 0; i < ThreadCount; i++ {
 		task := dti.Next()
 		if task != nil {
-			go startRemoveDownloadedTaskAndMakeDir(doneWg, progressBar, task, dti)
+			go startRemoveDownloadedTask(doneWg, progressBar, task, dti)
 		}
 	}
 	progressBar.Wait()
