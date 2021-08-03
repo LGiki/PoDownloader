@@ -91,7 +91,7 @@ func getPodcastRSSList() ([]string, error) {
 
 func download(cmd *cobra.Command, _ []string) {
 	if opmlFilePath == "" && rssListFilePath == "" && rss == "" {
-		fmt.Println("Please specify at least one parameter among opml, list and rss")
+		fmt.Println("Please specify at least one argument among \"opml\", \"list\" and \"rss\"")
 		fmt.Println()
 		_ = cmd.Help()
 		os.Exit(1)
@@ -144,6 +144,7 @@ func download(cmd *cobra.Command, _ []string) {
 	}
 }
 
+// initConfig initialize configuration items
 func initConfig() {
 	if configFilePath != "" {
 		viper.SetConfigFile(configFilePath)
@@ -155,11 +156,12 @@ func initConfig() {
 		viper.AddConfigPath(configPath)
 		viper.SetConfigName(".podownloader")
 	} else {
+		// When at least one argument is specified among "opml", "list" and "rss", the configuration file will not be loaded.
 		return
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Println("Can't load config file:", viper.ConfigFileUsed())
+		log.Println(fmt.Sprintf("Can't load config file %s: %s", viper.ConfigFileUsed(), err))
 		return
 	}
 
@@ -172,6 +174,7 @@ func initConfig() {
 	userAgent = viper.GetString("ua")
 	threadCount = viper.GetInt("thread")
 
+	// Print loaded configuration items
 	log.Println("Config items:")
 	log.Println("RSS list file path:", rssListFilePath)
 	log.Println("OPML file path:", opmlFilePath)
@@ -182,6 +185,6 @@ func initConfig() {
 
 	// Exit when no required configuration items in the configuration file
 	if opmlFilePath == "" && rssListFilePath == "" && rss == "" {
-		log.Fatalln("Please specify at least one parameter among opml, list and rss in config file")
+		log.Fatalln("Please specify at least one argument among \"opml\", \"list\" and \"rss\" in configuration file")
 	}
 }
