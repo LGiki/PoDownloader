@@ -29,7 +29,7 @@ func (dti *DownloadTaskIterator) GetLeftLength() int {
 	return len(dti.PodcastDownloadTasks) - dti.CurrentIndex
 }
 
-// Next returns next item of DownloadTaskIterator, and returns nil if next item does not exist
+// Next returns the next item of DownloadTaskIterator, and returns nil if next item does not exist
 func (dti *DownloadTaskIterator) Next() *PodcastDownloadTask {
 	if dti.CurrentIndex < len(dti.PodcastDownloadTasks) {
 		podcastDownloadTask := dti.PodcastDownloadTasks[dti.CurrentIndex]
