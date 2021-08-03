@@ -20,3 +20,9 @@ func TestFillTextToLength(t *testing.T) {
 	assert.Equal(t, "HelloWorld", FillTextToLength("HelloWorld", 6))
 	assert.Equal(t, "      ", FillTextToLength("", 6))
 }
+
+func TestRemoveDuplicateItemsInStringSlice(t *testing.T) {
+	result, duplicated := RemoveDuplicateItemsInStringSlice([]string{"a", "a", "a", "b", "c", "d", "d"})
+	assert.ElementsMatch(t, []string{"a", "b", "c", "d"}, result)
+	assert.ElementsMatch(t, []string{"a", "a", "d"}, duplicated)
+}

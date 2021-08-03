@@ -23,3 +23,18 @@ func FillTextToLength(text string, length int) string {
 	}
 	return text
 }
+
+// RemoveDuplicateItemsInStringSlice returns the string slice after removing duplicates and duplicated string items
+func RemoveDuplicateItemsInStringSlice(texts []string) (result []string, duplicatedItems []string) {
+	duplicated := make(map[string]bool)
+	for _, text := range texts {
+		_, isExist := duplicated[text]
+		if isExist {
+			duplicatedItems = append(duplicatedItems, text)
+		} else {
+			duplicated[text] = true
+			result = append(result, text)
+		}
+	}
+	return
+}

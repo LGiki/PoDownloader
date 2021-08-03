@@ -100,7 +100,16 @@ func download(cmd *cobra.Command, _ []string) {
 	if err != nil {
 		log.Fatalln("Can not load RSS list:", err)
 	}
+	podcastRSSList, duplicatedPodcastRSSList := util.RemoveDuplicateItemsInStringSlice(podcastRSSList)
+
 	log.Println(fmt.Sprintf("Loaded %d RSS link(s)", len(podcastRSSList)))
+
+	if len(duplicatedPodcastRSSList) > 0 {
+		log.Println(fmt.Sprintf("Found %d duplicate podcast RSS links:", len(duplicatedPodcastRSSList)))
+		for index, rss := range duplicatedPodcastRSSList {
+			log.Println(fmt.Sprintf("%d. %s", index+1, rss))
+		}
+	}
 
 	podcastList, failed := podcastParser.ParsePodcastsFromRSSList(podcastRSSList)
 
