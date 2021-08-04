@@ -13,6 +13,7 @@ import (
 // include two types of download tasks: URLDownloadTask and TextSaveTask
 type DownloadQueue struct {
 	tasks []interface{}
+	lock  *sync.Mutex
 }
 
 // NewDownloadQueueFromDownloadTasks converts []*PodcastDownloadTask to *DownloadQueue
@@ -45,17 +46,24 @@ func NewDownloadQueueFromDownloadTasks(podcastDownloadTasks []*PodcastDownloadTa
 			}
 		}
 	}
-	return &DownloadQueue{tasks: tasks}
+	return &DownloadQueue{
+		tasks: tasks,
+		lock:  &sync.Mutex{},
+	}
 }
 
 // EnQueue adds an element to the rear of the queue
 func (dq *DownloadQueue) EnQueue(podcastDownloadTasks *PodcastDownloadTask) {
+	dq.lock.Lock()
 	dq.tasks = append(dq.tasks, podcastDownloadTasks)
+	dq.lock.Unlock()
 }
 
 // DeQueue removes an element from the front of the queue
 func (dq *DownloadQueue) DeQueue() (interface{}, error) {
-	if dq.Length() > 0 {
+	dq.lock.Lock()
+	defer dq.lock.Unlock()
+	if len(dq.tasks) > 0 {
 		frontDownloadTask := dq.tasks[0]
 		dq.tasks = dq.tasks[1:]
 		return frontDownloadTask, nil
@@ -65,7 +73,9 @@ func (dq *DownloadQueue) DeQueue() (interface{}, error) {
 
 // Front returns queue front
 func (dq *DownloadQueue) Front() (interface{}, error) {
-	if dq.Length() > 0 {
+	dq.lock.Lock()
+	defer dq.lock.Unlock()
+	if len(dq.tasks) > 0 {
 		return dq.tasks[0], nil
 	}
 	return nil, errors.New("queue is empty")
@@ -73,12 +83,16 @@ func (dq *DownloadQueue) Front() (interface{}, error) {
 
 // Length returns queue length
 func (dq *DownloadQueue) Length() int {
+	dq.lock.Lock()
+	defer dq.lock.Unlock()
 	return len(dq.tasks)
 }
 
 // IsEmpty returns whether the queue is empty
 func (dq *DownloadQueue) IsEmpty() bool {
-	return dq.Length() == 0
+	dq.lock.Lock()
+	defer dq.lock.Unlock()
+	return len(dq.tasks) == 0
 }
 
 // download performs a download task and will start a download goroutine if the download queue is not empty
@@ -111,7 +125,7 @@ func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int)
 	failedFilePathChan := make(chan string)
 	taskCount := dq.Length()
 	doneWg := new(sync.WaitGroup)
-	doneWg.Add(dq.Length())
+	doneWg.Add(taskCount)
 	progressBar := mpb.New(
 		mpb.WithWaitGroup(doneWg),
 	)
