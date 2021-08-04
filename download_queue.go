@@ -1,6 +1,7 @@
 package podownloader
 
 import (
+	"PoDownloader/logger"
 	"errors"
 	"fmt"
 	"github.com/vbauerster/mpb/v7"
@@ -96,7 +97,7 @@ func (dq *DownloadQueue) IsEmpty() bool {
 }
 
 // download performs a download task and will start a download goroutine if the download queue is not empty
-func (dq *DownloadQueue) download(doneWg *sync.WaitGroup, progressBar *mpb.Progress, httpClient *http.Client, failedFilePathChan chan<- string, task interface{}) {
+func (dq *DownloadQueue) download(doneWg *sync.WaitGroup, progressBar *mpb.Progress, httpClient *http.Client, failedFilePathChan chan<- string, task interface{}, logger *logger.Logger) {
 	defer doneWg.Done()
 	failedFilePath := ""
 	if urlDownloadTask, ok := task.(*URLDownloadTask); ok {
@@ -104,23 +105,27 @@ func (dq *DownloadQueue) download(doneWg *sync.WaitGroup, progressBar *mpb.Progr
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to download %s: %s", urlDownloadTask.URL, err))
 			failedFilePath = urlDownloadTask.Dest
+		} else {
+			logger.PrintlnToFile(fmt.Sprintf("Successfully downloaded %s", urlDownloadTask.Dest))
 		}
 	} else if textSaveTask, ok := task.(*TextSaveTask); ok {
 		err := textSaveTask.SaveWithProgress(progressBar)
 		if err != nil {
 			log.Println(fmt.Sprintf("Failed to save %s: %s", textSaveTask.Dest, err))
 			failedFilePath = textSaveTask.Dest
+		} else {
+			logger.PrintlnToFile(fmt.Sprintf("Successfully downloaded %s", textSaveTask.Dest))
 		}
 	}
 	failedFilePathChan <- failedFilePath
 	newTask, err := dq.DeQueue()
 	if err == nil {
-		go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, newTask)
+		go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, newTask, logger)
 	}
 }
 
 // StartDownload will start ThreadCount download goroutines to perform download task
-func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int) []string {
+func (dq *DownloadQueue) StartDownload(ThreadCount int, httpClient *http.Client, logger *logger.Logger) []string {
 	var failedTaskDestPaths []string
 	failedFilePathChan := make(chan string)
 	taskCount := dq.Length()
@@ -132,7 +137,7 @@ func (dq *DownloadQueue) StartDownload(httpClient *http.Client, ThreadCount int)
 	for i := 0; i < ThreadCount; i++ {
 		task, err := dq.DeQueue()
 		if err == nil {
-			go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, task)
+			go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, task, logger)
 		}
 	}
 	for i := 0; i < taskCount; i++ {

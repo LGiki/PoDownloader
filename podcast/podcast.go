@@ -2,10 +2,10 @@ package podcast
 
 import (
 	podownloader "PoDownloader"
+	"PoDownloader/logger"
 	"PoDownloader/util"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"path"
 )
@@ -45,7 +45,7 @@ func (p *Podcast) GetPodcastDownloadDestDir(destDir string) string {
 	return path.Join(destDir, p.SafeTitle)
 }
 
-func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Client) []interface{} {
+func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Client, logger *logger.Logger) []interface{} {
 	var podcastDownloadTasks []interface{}
 	podcastDownloadDestDir := p.GetPodcastDownloadDestDir(destDir)
 
@@ -60,7 +60,7 @@ func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Clien
 	if p.ITunesExt.Image != "" {
 		podcastCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, p.ITunesExt.Image)
 		if err != nil {
-			log.Println(fmt.Sprintf("Failed to get cover extension name of podcast [%s]: %s", p.Title, p.ITunesExt.Image))
+			logger.Println(fmt.Sprintf("Failed to get cover extension name of podcast [%s]: %s", p.Title, p.ITunesExt.Image))
 		}
 		podcastCoverDownloadDest := path.Join(podcastDownloadDestDir, fmt.Sprintf("cover.%s", podcastCoverExtensionName))
 		podcastDownloadTasks = append(podcastDownloadTasks, &podownloader.URLDownloadTask{
@@ -79,7 +79,7 @@ func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Clien
 		if item.ITunesExt.Image != "" {
 			episodeCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, item.ITunesExt.Image)
 			if err != nil {
-				log.Println(fmt.Sprintf("Failed to get cover extension name of episode [%s] - [%s]: %s", p.Title, item.Title, item.ITunesExt.Image))
+				logger.Println(fmt.Sprintf("Failed to get cover extension name of episode [%s] - [%s]: %s", p.Title, item.Title, item.ITunesExt.Image))
 			} else {
 				podcastDownloadTasks = append(podcastDownloadTasks, &podownloader.URLDownloadTask{
 					JobName: fmt.Sprintf("%s - %s | Cover", p.Title, item.Title),
@@ -101,7 +101,7 @@ func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Clien
 		for index, enclosure := range item.Enclosures {
 			enclosureExtensionName, err := enclosure.GetEnclosureFileExtensionName(httpClient)
 			if err != nil {
-				log.Println(fmt.Sprintf("Failed to get enclosure extension name of [%s] - [%s]: %s", p.Title, item.Title, enclosure.URL))
+				logger.Println(fmt.Sprintf("Failed to get enclosure extension name of [%s] - [%s]: %s", p.Title, item.Title, enclosure.URL))
 			} else {
 				var (
 					enclosureFileName string
@@ -127,7 +127,7 @@ func (p *Podcast) GetPodcastDownloadTasks(destDir string, httpClient *http.Clien
 	return podcastDownloadTasks
 }
 
-func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client) *podownloader.PodcastDownloadTask {
+func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client, logger *logger.Logger) *podownloader.PodcastDownloadTask {
 	podcastDownloadDestDir := p.GetPodcastDownloadDestDir(destDir)
 
 	// Podcast cover download task
@@ -135,7 +135,7 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 	if p.ITunesExt.Image != "" {
 		podcastCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, p.ITunesExt.Image)
 		if err != nil {
-			log.Println(fmt.Sprintf("Failed to get cover extension name of podcast [%s]: %s", p.Title, p.ITunesExt.Image))
+			logger.Println(fmt.Sprintf("Failed to get cover extension name of podcast [%s]: %s", p.Title, p.ITunesExt.Image))
 		}
 		podcastCoverDownloadDest := path.Join(podcastDownloadDestDir, fmt.Sprintf("cover.%s", podcastCoverExtensionName))
 		podcastCoverDownloadTask = &podownloader.URLDownloadTask{
@@ -157,7 +157,7 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 		if item.ITunesExt.Image != "" {
 			episodeCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, item.ITunesExt.Image)
 			if err != nil {
-				log.Println(fmt.Sprintf("Failed to get cover extension name of episode [%s] - [%s]: %s", p.Title, item.Title, item.ITunesExt.Image))
+				logger.Println(fmt.Sprintf("Failed to get cover extension name of episode [%s] - [%s]: %s", p.Title, item.Title, item.ITunesExt.Image))
 			} else {
 				episodeCoverDownloadTask = &podownloader.URLDownloadTask{
 					JobName: fmt.Sprintf("%s - %s", p.Title, item.Title),
@@ -184,7 +184,7 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 		for index, enclosure := range item.Enclosures {
 			enclosureExtensionName, err := enclosure.GetEnclosureFileExtensionName(httpClient)
 			if err != nil {
-				log.Println(fmt.Sprintf("Failed to get enclosure extension name of [%s] - [%s]: %s", p.Title, item.Title, enclosure.URL))
+				logger.Println(fmt.Sprintf("Failed to get enclosure extension name of [%s] - [%s]: %s", p.Title, item.Title, enclosure.URL))
 			} else {
 				var (
 					enclosureFileName string
