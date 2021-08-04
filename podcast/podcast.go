@@ -3,6 +3,7 @@ package podcast
 import (
 	podownloader "PoDownloader"
 	"PoDownloader/util"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -228,4 +229,12 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 			Dest:    path.Join(podcastDownloadDestDir, "rss.xml"),
 		},
 	}
+}
+
+func (p *Podcast) GetJSON() (string, error) {
+	jsonBytes, err := json.Marshal(p)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }

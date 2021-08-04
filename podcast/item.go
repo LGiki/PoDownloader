@@ -1,6 +1,7 @@
 package podcast
 
 import (
+	"encoding/json"
 	"path"
 	"time"
 )
@@ -29,4 +30,12 @@ type ITunesItemExtension struct {
 // item download destination dir = Podcast download destination dir + episode title
 func (i *Item) GetItemDownloadDestDir(podcastDir string) string {
 	return path.Join(podcastDir, i.SafeTitle)
+}
+
+func (i *Item) GetJSON() (string, error) {
+	jsonBytes, err := json.Marshal(i)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }

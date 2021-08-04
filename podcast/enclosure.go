@@ -2,6 +2,7 @@ package podcast
 
 import (
 	"PoDownloader/util"
+	"encoding/json"
 	"net/http"
 )
 
@@ -25,4 +26,12 @@ func (e *Enclosure) GetEnclosureFileExtensionName(httpClient *http.Client) (stri
 		return "", err
 	}
 	return extensionName, nil
+}
+
+func (e *Enclosure) GetJSON() (string, error) {
+	jsonBytes, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }
