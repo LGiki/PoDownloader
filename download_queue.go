@@ -2,12 +2,14 @@ package podownloader
 
 import (
 	"PoDownloader/logger"
+	"context"
 	"errors"
-	"fmt"
 	"github.com/vbauerster/mpb/v7"
-	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 )
 
 // DownloadQueue is the queue of download tasks
@@ -96,56 +98,41 @@ func (dq *DownloadQueue) IsEmpty() bool {
 	return len(dq.tasks) == 0
 }
 
-// download performs a download task and will start a download goroutine if the download queue is not empty
-func (dq *DownloadQueue) download(doneWg *sync.WaitGroup, progressBar *mpb.Progress, httpClient *http.Client, failedFilePathChan chan<- string, task interface{}, logger *logger.Logger) {
-	defer doneWg.Done()
-	failedFilePath := ""
-	if urlDownloadTask, ok := task.(*URLDownloadTask); ok {
-		err := urlDownloadTask.DownloadWithProgress(httpClient, progressBar)
-		if err != nil {
-			log.Println(fmt.Sprintf("Failed to download %s: %s", urlDownloadTask.URL, err))
-			failedFilePath = urlDownloadTask.Dest
-		} else {
-			logger.PrintlnToFile(fmt.Sprintf("Successfully downloaded %s", urlDownloadTask.Dest))
-		}
-	} else if textSaveTask, ok := task.(*TextSaveTask); ok {
-		err := textSaveTask.SaveWithProgress(progressBar)
-		if err != nil {
-			log.Println(fmt.Sprintf("Failed to save %s: %s", textSaveTask.Dest, err))
-			failedFilePath = textSaveTask.Dest
-		} else {
-			logger.PrintlnToFile(fmt.Sprintf("Successfully downloaded %s", textSaveTask.Dest))
-		}
-	}
-	failedFilePathChan <- failedFilePath
-	newTask, err := dq.DeQueue()
-	if err == nil {
-		go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, newTask, logger)
-	}
-}
-
-// StartDownload will start ThreadCount download goroutines to perform download task
-func (dq *DownloadQueue) StartDownload(ThreadCount int, httpClient *http.Client, logger *logger.Logger) []string {
-	var failedTaskDestPaths []string
-	failedFilePathChan := make(chan string)
+func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client, logger *logger.Logger) []string {
 	taskCount := dq.Length()
 	doneWg := new(sync.WaitGroup)
-	doneWg.Add(taskCount)
+	doneWg.Add(threadCount)
 	progressBar := mpb.New(
 		mpb.WithWaitGroup(doneWg),
 	)
-	for i := 0; i < ThreadCount; i++ {
-		task, err := dq.DeQueue()
-		if err == nil {
-			go dq.download(doneWg, progressBar, httpClient, failedFilePathChan, task, logger)
-		}
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	downloadWorker := NewDownloadWorker(doneWg, httpClient, progressBar, logger, threadCount)
+
+	go downloadWorker.Start(ctx)
+	for i := 0; i < threadCount; i++ {
+		go downloadWorker.WorkerFunc()
 	}
-	for i := 0; i < taskCount; i++ {
-		failedFilePath := <-failedFilePathChan
-		if failedFilePath != "" {
-			failedTaskDestPaths = append(failedTaskDestPaths, failedFilePath)
+
+	go func() {
+		termChan := make(chan os.Signal)
+		signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
+
+		<-termChan
+
+		logger.Println("Received cancellation signal, waiting for all download tasks done")
+		cancelFunc()
+	}()
+
+	go func() {
+		for i := 0; i < taskCount; i++ {
+			task, err := dq.DeQueue()
+			if err != nil {
+
+			}
+			downloadWorker.IngestChan <- task
 		}
-	}
-	progressBar.Wait()
-	return failedTaskDestPaths
+	}()
+
+	doneWg.Wait()
+	return downloadWorker.FailedTaskDestPaths
 }
