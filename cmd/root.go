@@ -7,8 +7,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   os.Args[0],
-	Short: "PoDownloader is a simple tool to download podcast.",
-	Long: `PoDownloader is a simple tool to download podcast.
+	Short: "PoDownloader is a simple CLI tool to download podcast.",
+	Long: `PoDownloader is a simple CLI tool to download podcast.
 
 This tool will download podcast RSS, podcast cover image, episode audio files, episode cover images and episode shownotes.
 
