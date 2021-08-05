@@ -62,11 +62,11 @@ func startRemoveDownloadedTask(doneWg *sync.WaitGroup, progressBar *mpb.Progress
 
 // RemoveDownloadedTask will start ThreadCount startRemoveDownloadedTask goroutines to remove
 // downloaded tasks
-func (dti *DownloadTaskIterator) RemoveDownloadedTask(ThreadCount int) {
+func (dti *DownloadTaskIterator) RemoveDownloadedTask(threadCount int) {
 	doneWg := new(sync.WaitGroup)
 	doneWg.Add(dti.GetLeftLength())
 	progressBar := mpb.New(mpb.WithWaitGroup(doneWg))
-	for i := 0; i < ThreadCount; i++ {
+	for i := 0; i < threadCount; i++ {
 		task := dti.Next()
 		if task != nil {
 			go startRemoveDownloadedTask(doneWg, progressBar, task, dti)
