@@ -101,6 +101,16 @@ Using `-u` or `--ua` to specify user agent, default user agent is `Mozilla/5.0 (
 
 Using `-t` or `--thread` to specify download threads, default download threads is `3`.
 
+## Log directory
+
+You can specify `--log` parameter to set the log directory.
+
+If you specify the `--log` parameter, the log file will be saved to the directory you specified.
+
+If you leave the `--log` parameter empty, no log file will be generated.
+
+Default value of `--log` is empty.
+
 # Configuration file
 
 If you don't want to specify parameters every time you run the program, you can save the parameters in a configuration file, the program will automatically load the parameters from the configuration file.
