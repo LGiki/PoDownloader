@@ -51,7 +51,7 @@ func init() {
 	downloadCmd.Flags().StringVarP(&outputFolder, "output", "o", "podcast", "Download destination folder")
 	downloadCmd.Flags().StringVarP(&userAgent, "ua", "u", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36", "User Agent")
 	downloadCmd.Flags().StringVarP(&configFilePath, "config", "c", "", "Configuration file (default is $PWD/.podownloader)")
-	downloadCmd.Flags().StringVar(&logFolder, "log", "", "Log folder path")
+	downloadCmd.Flags().StringVar(&logFolder, "log", "", "Log folder path, if you leave this blank, no logs will be generated")
 	downloadCmd.Flags().IntVarP(&threadCount, "thread", "t", 3, "Download threads")
 
 	// Define configuration keys
