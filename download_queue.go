@@ -98,8 +98,11 @@ func (dq *DownloadQueue) IsEmpty() bool {
 	return len(dq.tasks) == 0
 }
 
+// StartDownload will start threadCount download goroutines to download podcasts
+// and returns the destination download paths of the failed tasks
 func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client, logger *logger.Logger) []string {
 	taskCount := dq.Length()
+	// Using doneWg to wait for all download workers done
 	doneWg := new(sync.WaitGroup)
 	doneWg.Add(threadCount)
 	progressBar := mpb.New(
@@ -108,11 +111,13 @@ func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client,
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	downloadWorker := NewDownloadWorker(doneWg, httpClient, progressBar, logger, threadCount)
 
+	// Start all download workers
 	go downloadWorker.Start(ctx)
 	for i := 0; i < threadCount; i++ {
 		go downloadWorker.WorkerFunc()
 	}
 
+	// Listen to the SIGINT and SIGTERM signal
 	go func() {
 		termChan := make(chan os.Signal)
 		signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
@@ -123,16 +128,17 @@ func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client,
 		cancelFunc()
 	}()
 
+	// Feed download tasks to downloadWorker.IngestChan
 	go func() {
 		for i := 0; i < taskCount; i++ {
 			task, err := dq.DeQueue()
-			if err != nil {
-
+			if err == nil {
+				downloadWorker.IngestChan <- task
 			}
-			downloadWorker.IngestChan <- task
 		}
 	}()
 
+	// Wait for all download workers done
 	doneWg.Wait()
 	return downloadWorker.FailedTaskDestPaths
 }
