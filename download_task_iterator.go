@@ -41,11 +41,10 @@ func (dti *DownloadTaskIterator) Next() *PodcastDownloadTask {
 	defer dti.lock.Unlock()
 	if dti.CurrentIndex < len(dti.PodcastDownloadTasks) {
 		podcastDownloadTask := dti.PodcastDownloadTasks[dti.CurrentIndex]
-		dti.CurrentIndex += 1
+		dti.CurrentIndex++
 		return podcastDownloadTask
-	} else {
-		return nil
 	}
+	return nil
 }
 
 // startRemoveDownloadedTask calls PodcastDownloadTask.RemoveDownloadedTaskWithProgress
