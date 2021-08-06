@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+// DownloadWorker is the worker to download podcasts
 type DownloadWorker struct {
 	doneWg              *sync.WaitGroup
 	httpClient          *http.Client
@@ -20,6 +21,7 @@ type DownloadWorker struct {
 	failedTaskListLock  *sync.Mutex
 }
 
+// NewDownloadWorker initializes and returns a DownloadWorker instance
 func NewDownloadWorker(doneWg *sync.WaitGroup, httpClient *http.Client, progressBar *mpb.Progress, logger *logger.Logger, threadCount int) *DownloadWorker {
 	var failedTaskDestPaths []string
 	return &DownloadWorker{
@@ -34,6 +36,7 @@ func NewDownloadWorker(doneWg *sync.WaitGroup, httpClient *http.Client, progress
 	}
 }
 
+// WorkerFunc is the download worker function
 func (dw *DownloadWorker) WorkerFunc() {
 	defer dw.doneWg.Done()
 	for task := range dw.tasksChan {
@@ -61,6 +64,7 @@ func (dw *DownloadWorker) WorkerFunc() {
 	}
 }
 
+// Start feeds download tasks to tasksChan, and close tasksChan when receives ctx.Done
 func (dw *DownloadWorker) Start(ctx context.Context) {
 	for {
 		select {
