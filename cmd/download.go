@@ -183,11 +183,11 @@ func initConfig() {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Println(fmt.Sprintf("Can't load config file %s: %s", viper.ConfigFileUsed(), err))
+		log.Println(fmt.Sprintf("Can't load config file %s: %s", viper.ConfigFileUsed(), err))
 		return
 	}
 
-	logger.Println("Using config file:", viper.ConfigFileUsed())
+	log.Println("Using config file:", viper.ConfigFileUsed())
 
 	rssListFilePath = viper.GetString("list")
 	opmlFilePath = viper.GetString("opml")
@@ -198,14 +198,14 @@ func initConfig() {
 	logFolder = viper.GetString("log")
 
 	// Print loaded configuration items
-	logger.Println("Config items:")
-	logger.Println("RSS list file path:", rssListFilePath)
-	logger.Println("OPML file path:", opmlFilePath)
-	logger.Println("RSS:", rss)
-	logger.Println("Output folder:", outputFolder)
-	logger.Println("User agent:", userAgent)
-	logger.Println("Thread count:", threadCount)
-	logger.Println("Log folder:", logFolder)
+	log.Println("Config items:")
+	log.Println("RSS list file path:", rssListFilePath)
+	log.Println("OPML file path:", opmlFilePath)
+	log.Println("RSS:", rss)
+	log.Println("Output folder:", outputFolder)
+	log.Println("User agent:", userAgent)
+	log.Println("Thread count:", threadCount)
+	log.Println("Log folder:", logFolder)
 
 	// Exit when no required configuration items in the configuration file
 	if opmlFilePath == "" && rssListFilePath == "" && rss == "" {
