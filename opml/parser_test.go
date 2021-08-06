@@ -29,13 +29,13 @@ func TestParseOPMLFromText(t *testing.T) {
 	assert.Equal(t, "Sat, 24 Jul 2021 01:32:00 GMT", opml.Head.DateModified)
 	assert.Equal(t, "foobar", opml.Head.OwnerName)
 	assert.Equal(t, "foobar@example.org", opml.Head.OwnerEmail)
-	assert.Equal(t, "foobar", opml.Head.OwnerId)
+	assert.Equal(t, "foobar", opml.Head.OwnerID)
 	assert.Equal(t, "Example Podcast", opml.Body.Outlines[0].Text)
 	assert.Equal(t, "Example Podcast", opml.Body.Outlines[0].Title)
 	assert.Equal(t, "rss", opml.Body.Outlines[0].Type)
 	assert.Equal(t, "Example Podcast", opml.Body.Outlines[0].Description)
 	assert.Equal(t, "https://example.org/rss", opml.Body.Outlines[0].XMLUrl)
-	assert.Equal(t, "https://example.org", opml.Body.Outlines[0].HtmlUrl)
+	assert.Equal(t, "https://example.org", opml.Body.Outlines[0].HTMLUrl)
 
 	// Test wrong OPML
 	opml, err = ParseOPMLFromText("test")

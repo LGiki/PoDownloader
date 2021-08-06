@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+// parseOPMLFromBytes parses OPML from bytes slice
+// and returns an OPML instance
 func parseOPMLFromBytes(bytes []byte) (*OPML, error) {
 	var opml OPML
 	err := xml.Unmarshal(bytes, &opml)
@@ -15,10 +17,14 @@ func parseOPMLFromBytes(bytes []byte) (*OPML, error) {
 	return &opml, nil
 }
 
+// ParseOPMLFromText parses OPML from text
+// and returns an OPML instance
 func ParseOPMLFromText(text string) (*OPML, error) {
 	return parseOPMLFromBytes([]byte(text))
 }
 
+// ParseOPMLFromFile parses OPML from given file path
+// and returns an OPML instance
 func ParseOPMLFromFile(filePath string) (*OPML, error) {
 	bytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -27,6 +33,8 @@ func ParseOPMLFromFile(filePath string) (*OPML, error) {
 	return parseOPMLFromBytes(bytes)
 }
 
+// ParseOPMLFromURL parses OPML from given URL using given http client
+// and returns an OPML instance
 func ParseOPMLFromURL(httpClient *http.Client, url string) (*OPML, error) {
 	resp, err := httpClient.Get(url)
 	if err != nil {
