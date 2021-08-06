@@ -152,6 +152,7 @@ func download(cmd *cobra.Command, _ []string) {
 	podcastDownloadTaskIterator := podownloader.NewDownloadTaskIterator(podcastDownloadTasks)
 	podcastDownloadTaskIterator.RemoveDownloadedTask(threadCount)
 
+	logger.Println(fmt.Sprintf("Totally %d download tasks", len(podcastDownloadTaskIterator.PodcastDownloadTasks)))
 	logger.Println("Start download")
 	downloadQueue := podownloader.NewDownloadQueueFromDownloadTasks(podcastDownloadTaskIterator.PodcastDownloadTasks)
 	failedTaskDestPaths := downloadQueue.StartDownload(threadCount, httpClient, logger)
