@@ -21,7 +21,7 @@ type DownloadQueue struct {
 
 // NewDownloadQueueFromDownloadTasks converts []*PodcastDownloadTask to *DownloadQueue
 // and returns the converted *DownloadQueue
-// *DownloadQueue will contains 5 types of download tasks:
+// *DownloadQueue will contain 5 types of download tasks:
 // 1. Podcast cover download task
 // 2. Podcast RSS download task
 // 3. Episode cover download task
@@ -101,19 +101,24 @@ func (dq *DownloadQueue) IsEmpty() bool {
 // StartDownload will start threadCount download goroutines to download podcasts
 // and returns the destination download paths of the failed tasks
 func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client, logger *logger.Logger) []string {
-	taskCount := dq.Length()
+	realThreadCount := threadCount
+	// When given download threads is greater than the number of download tasks,
+	// using the number of download tasks as download threads
+	if threadCount > dq.Length() {
+		realThreadCount = dq.Length()
+	}
+
 	// Using doneWg to wait for all download workers done
 	doneWg := new(sync.WaitGroup)
-	doneWg.Add(threadCount)
+	doneWg.Add(realThreadCount)
 	progressBar := mpb.New(
 		mpb.WithWaitGroup(doneWg),
 	)
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	downloadWorker := NewDownloadWorker(doneWg, httpClient, progressBar, logger, threadCount)
+	downloadWorker := NewDownloadWorker(doneWg, httpClient, progressBar, logger, realThreadCount)
 
 	// Start all download workers
-	go downloadWorker.Start(ctx)
-	for i := 0; i < threadCount; i++ {
+	for i := 0; i < realThreadCount; i++ {
 		go downloadWorker.WorkerFunc()
 	}
 
@@ -128,17 +133,29 @@ func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client,
 		cancelFunc()
 	}()
 
-	// Feed download tasks to downloadWorker.IngestChan
+	// Producer: feed download tasks to downloadWorker.IngestChan
 	go func() {
-		for i := 0; i < taskCount; i++ {
-			task, err := dq.DeQueue()
-			if err == nil {
-				downloadWorker.IngestChan <- task
+		for {
+			select {
+			case <-ctx.Done():
+				// Remove all unstarted download tasks
+				for len(downloadWorker.TasksChan) > 0 {
+					<-downloadWorker.TasksChan
+				}
+				close(downloadWorker.TasksChan)
+				return
+			default:
+				task, err := dq.DeQueue()
+				if err != nil {
+					close(downloadWorker.TasksChan)
+					return
+				}
+				downloadWorker.TasksChan <- task
 			}
 		}
 	}()
 
 	// Wait for all download workers done
-	doneWg.Wait()
+	progressBar.Wait()
 	return downloadWorker.FailedTaskDestPaths
 }

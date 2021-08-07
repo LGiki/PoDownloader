@@ -2,7 +2,6 @@ package podownloader
 
 import (
 	"PoDownloader/logger"
-	"context"
 	"fmt"
 	"github.com/vbauerster/mpb/v7"
 	"net/http"
@@ -15,8 +14,7 @@ type DownloadWorker struct {
 	httpClient          *http.Client
 	progressBar         *mpb.Progress
 	logger              *logger.Logger
-	IngestChan          chan interface{}
-	tasksChan           chan interface{}
+	TasksChan           chan interface{}
 	FailedTaskDestPaths []string
 	failedTaskListLock  *sync.Mutex
 }
@@ -29,8 +27,7 @@ func NewDownloadWorker(doneWg *sync.WaitGroup, httpClient *http.Client, progress
 		httpClient:          httpClient,
 		progressBar:         progressBar,
 		logger:              logger,
-		IngestChan:          make(chan interface{}, 1),
-		tasksChan:           make(chan interface{}, threadCount),
+		TasksChan:           make(chan interface{}, threadCount),
 		FailedTaskDestPaths: failedTaskDestPaths,
 		failedTaskListLock:  &sync.Mutex{},
 	}
@@ -39,7 +36,7 @@ func NewDownloadWorker(doneWg *sync.WaitGroup, httpClient *http.Client, progress
 // WorkerFunc is the download worker function
 func (dw *DownloadWorker) WorkerFunc() {
 	defer dw.doneWg.Done()
-	for task := range dw.tasksChan {
+	for task := range dw.TasksChan {
 		if urlDownloadTask, ok := task.(*URLDownloadTask); ok {
 			err := urlDownloadTask.DownloadWithProgress(dw.httpClient, dw.progressBar)
 			if err != nil {
@@ -60,22 +57,6 @@ func (dw *DownloadWorker) WorkerFunc() {
 			} else {
 				dw.logger.PrintlnToFile(fmt.Sprintf("Successfully downloaded %s", textSaveTask.Dest))
 			}
-		}
-	}
-}
-
-// Start feeds download tasks to tasksChan, and close tasksChan when receives ctx.Done
-func (dw *DownloadWorker) Start(ctx context.Context) {
-	for {
-		select {
-		case <-ctx.Done():
-			for len(dw.tasksChan) > 0 {
-				<-dw.tasksChan
-			}
-			close(dw.tasksChan)
-			return
-		case job := <-dw.IngestChan:
-			dw.tasksChan <- job
 		}
 	}
 }
