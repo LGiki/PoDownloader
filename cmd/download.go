@@ -163,11 +163,11 @@ func download(cmd *cobra.Command, _ []string) {
 	failedTaskDestPaths := downloadQueue.StartDownload(threadCount, httpClient, logger)
 	logger.Println("Download finished")
 
-	// Print failed tasks
+	// Print failed download tasks
 	if len(failedTaskDestPaths) > 0 {
-		fmt.Println(fmt.Sprintf("%d file(s) download failed:", len(failedTaskDestPaths)))
+		logger.Println(fmt.Sprintf("%d file(s) download failed:", len(failedTaskDestPaths)))
 		for index, failedTaskDestPath := range failedTaskDestPaths {
-			fmt.Println(fmt.Sprintf("%d. %s", index+1, failedTaskDestPath))
+			logger.Println(fmt.Sprintf("%d. %s", index+1, failedTaskDestPath))
 		}
 	}
 }
