@@ -193,7 +193,7 @@ func initConfig() {
 		return
 	}
 
-	log.Println("Using config file:", viper.ConfigFileUsed())
+	log.Println("Using configuration file:", viper.ConfigFileUsed())
 
 	rssListFilePath = viper.GetString("list")
 	opmlFilePath = viper.GetString("opml")
@@ -204,14 +204,14 @@ func initConfig() {
 	logFolder = viper.GetString("log")
 
 	// Print loaded configuration items
-	log.Println("Config items:")
-	log.Println("RSS list file path:", rssListFilePath)
-	log.Println("OPML file path:", opmlFilePath)
-	log.Println("RSS:", rss)
-	log.Println("Output folder:", outputFolder)
-	log.Println("User agent:", userAgent)
-	log.Println("Thread count:", threadCount)
-	log.Println("Log folder:", logFolder)
+	log.Println("Configuration items:")
+	log.Println("-> RSS list file path:", rssListFilePath)
+	log.Println("-> OPML file path:", opmlFilePath)
+	log.Println("-> RSS:", rss)
+	log.Println("-> Output folder:", outputFolder)
+	log.Println("-> User agent:", userAgent)
+	log.Println("-> Thread count:", threadCount)
+	log.Println("-> Log folder:", logFolder)
 
 	// Exit when no required configuration items in the configuration file
 	if opmlFilePath == "" && rssListFilePath == "" && rss == "" {
