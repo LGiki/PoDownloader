@@ -23,7 +23,7 @@ func getLogFileNameByDate() string {
 }
 
 // getLogFilePathByDate returns a string that concatenates
-// the given log folder path and the log file name with date
+// the specified log folder path and the log file name with date
 func getLogFilePathByDate(logFolder string) string {
 	return filepath.Join(logFolder, getLogFileNameByDate())
 }

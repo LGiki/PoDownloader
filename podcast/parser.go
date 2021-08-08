@@ -21,7 +21,7 @@ func NewPodcastParser(httpClient *http.Client) *Parser {
 	return &Parser{rssParser}
 }
 
-// ParsePodcastRSS returns a Podcast instance that parsed from given RSS link
+// ParsePodcastRSS returns a Podcast instance that parsed from specified RSS link
 func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 	feed, err := p.ParseURL(RSS)
 	if err != nil {

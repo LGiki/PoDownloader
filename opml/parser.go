@@ -23,7 +23,7 @@ func ParseOPMLFromText(text string) (*OPML, error) {
 	return parseOPMLFromBytes([]byte(text))
 }
 
-// ParseOPMLFromFile parses OPML from given file path
+// ParseOPMLFromFile parses OPML from specified file path
 // and returns an OPML instance
 func ParseOPMLFromFile(filePath string) (*OPML, error) {
 	bytes, err := ioutil.ReadFile(filePath)
@@ -33,7 +33,7 @@ func ParseOPMLFromFile(filePath string) (*OPML, error) {
 	return parseOPMLFromBytes(bytes)
 }
 
-// ParseOPMLFromURL parses OPML from given URL using given http client
+// ParseOPMLFromURL parses OPML from specified URL using specified http client
 // and returns an OPML instance
 func ParseOPMLFromURL(httpClient *http.Client, url string) (*OPML, error) {
 	resp, err := httpClient.Get(url)

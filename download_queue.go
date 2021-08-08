@@ -102,7 +102,7 @@ func (dq *DownloadQueue) IsEmpty() bool {
 // and returns the destination download paths of the failed tasks
 func (dq *DownloadQueue) StartDownload(threadCount int, httpClient *http.Client, logger *logger.Logger) []string {
 	realThreadCount := threadCount
-	// When given download threads is greater than the number of download tasks,
+	// When specified download threads is greater than the number of download tasks,
 	// using the number of download tasks as download threads
 	if threadCount > dq.Length() {
 		realThreadCount = dq.Length()
