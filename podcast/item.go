@@ -32,6 +32,7 @@ func (i *Item) GetItemDownloadDestDir(podcastDir string) string {
 	return path.Join(podcastDir, i.SafeTitle)
 }
 
+// GetJSON returns an Item instance JSON format
 func (i *Item) GetJSON() (string, error) {
 	jsonBytes, err := json.Marshal(i)
 	if err != nil {

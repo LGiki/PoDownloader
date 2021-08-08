@@ -9,16 +9,19 @@ import (
 	"sync"
 )
 
+// Parser is used to parse podcasts
 type Parser struct {
 	*gofeed.Parser
 }
 
+// NewPodcastParser initializes and returns a Parser instance
 func NewPodcastParser(httpClient *http.Client) *Parser {
 	rssParser := gofeed.NewParser()
 	rssParser.Client = httpClient
 	return &Parser{rssParser}
 }
 
+// ParsePodcastRSS returns a Podcast instance that parsed from given RSS link
 func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 	feed, err := p.ParseURL(RSS)
 	if err != nil {
@@ -82,7 +85,8 @@ func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 	}, nil
 }
 
-func (p *Parser) ParsePodcastsFromRSSList(rssList []string) ([]*Podcast, []string) {
+// ParsePodcastsFromRSSListWithProgress returns Podcast
+func (p *Parser) ParsePodcastsFromRSSListWithProgress(rssList []string) ([]*Podcast, []string) {
 	var (
 		podcasts []*Podcast
 		failed   []string

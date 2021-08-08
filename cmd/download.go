@@ -124,7 +124,7 @@ func download(cmd *cobra.Command, _ []string) {
 		}
 	}
 
-	podcastList, failed := podcastParser.ParsePodcastsFromRSSList(podcastRSSList)
+	podcastList, failed := podcastParser.ParsePodcastsFromRSSListWithProgress(podcastRSSList)
 
 	if len(podcastList) != 0 {
 		logger.Println(fmt.Sprintf("Successfully parsed %d RSS link(s)", len(podcastList)))

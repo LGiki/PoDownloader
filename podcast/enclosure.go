@@ -28,6 +28,7 @@ func (e *Enclosure) GetEnclosureFileExtensionName(httpClient *http.Client) (stri
 	return extensionName, nil
 }
 
+// GetJSON returns an Enclosure instance in JSON format
 func (e *Enclosure) GetJSON() (string, error) {
 	jsonBytes, err := json.Marshal(e)
 	if err != nil {
