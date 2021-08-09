@@ -47,7 +47,7 @@ type PodcastDownloadTask struct {
 
 // Save writes TextSaveTask.Text to TextSaveTask.Dest
 func (t *TextSaveTask) Save() error {
-	return util.WriteFile(t.Text, t.Dest)
+	return util.WriteContentToFile(t.Text, t.Dest)
 }
 
 // SaveWithProgress writes TextSaveTask.Text to TextSaveTask.Dest with progress bar
@@ -68,7 +68,7 @@ func (t *TextSaveTask) SaveWithProgress(progressBar *mpb.Progress) error {
 			decor.Percentage(decor.WC{W: 5}),
 		),
 	)
-	err = util.WriteFile(t.Text, t.Dest)
+	err = util.WriteContentToFile(t.Text, t.Dest)
 	if err != nil {
 		return err
 	}

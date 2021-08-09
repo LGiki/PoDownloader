@@ -1,8 +1,7 @@
 package util
 
-// GetFirstNCharacters
-// Get first n characters of string with Chinese support,
-// if giving n is greater then string length will return string directly
+// GetFirstNCharacters returns first n characters of string with Chinese support,
+// if giving n is greater than string length will return string directly
 func GetFirstNCharacters(text string, n int) string {
 	textRune := []rune(text)
 	if len(textRune) >= n {
@@ -11,8 +10,7 @@ func GetFirstNCharacters(text string, n int) string {
 	return text
 }
 
-// FillTextToLength
-// Fill the text to giving length by append blanks to the string,
+// FillTextToLength fills the text to giving length by append blanks to the string,
 // if the string length the greater than giving length will return string directly
 func FillTextToLength(text string, length int) string {
 	if len(text) < length {

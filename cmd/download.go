@@ -77,7 +77,7 @@ func getPodcastRSSList() ([]string, error) {
 			podcastOPML *opml.OPML
 			err         error
 		)
-		if util.IsValidHttpLink(opmlFilePath) {
+		if util.IsValidHTTPLink(opmlFilePath) {
 			podcastOPML, err = opml.ParseOPMLFromURL(httpClient, opmlFilePath)
 		} else {
 			podcastOPML, err = opml.ParseOPMLFromFile(opmlFilePath)

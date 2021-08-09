@@ -4,10 +4,22 @@ import (
 	url2 "net/url"
 )
 
-func IsValidHttpLink(str string) bool {
-	url, err := url2.Parse(str)
+// IsValidHTTPLink returns true if specified url is a valid http link, otherwise it returns false
+func IsValidHTTPLink(url string) bool {
+	parsedURL, err := url2.Parse(url)
 	if err != nil {
 		return false
 	}
-	return (url.Scheme == "http" || url.Scheme == "https") && url.Host != ""
+	return (parsedURL.Scheme == "http" || parsedURL.Scheme == "https") && parsedURL.Host != ""
+}
+
+// StripQueryParam returns a URL that does not contain any query parameters
+func StripQueryParam(inURL string) string {
+	u, err := url2.Parse(inURL)
+	if err != nil {
+		return inURL
+	}
+	u.RawQuery = ""
+	u.Fragment = ""
+	return u.String()
 }

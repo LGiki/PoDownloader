@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// NewHTTPClient initializes and returns a http client that will send http requests using specified user agent
 func NewHTTPClient(userAgent string) *http.Client {
 	proxyFunc := httpproxy.FromEnvironment().ProxyFunc()
 	return &http.Client{

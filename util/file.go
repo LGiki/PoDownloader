@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"regexp"
 	"strings"
 )
 
+// mimeTypeToExtensionName maps mime type name to file extension name
 // See also:
 // - https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 // - https://www.iana.org/assignments/media-types/media-types.xhtml
@@ -33,6 +33,7 @@ var mimeTypeToExtensionName = map[string]string{
 	"text/xml": "xml",
 }
 
+// extensionNames is a string slice that contains all extensionNames appeared in mimeTypeToExtensionName
 var extensionNames = []string{
 	// Audio
 	"aac", "mp3", "mp4", "wav", "m4a", "wav", "aiff", "ogg",
@@ -42,8 +43,7 @@ var extensionNames = []string{
 	"xml",
 }
 
-// SanitizeFileName
-// Remove invalid characters in filename
+// SanitizeFileName returns file name with invalid characters removed
 // See also: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 func SanitizeFileName(fileName string) string {
 	fileName = regexp.MustCompile(`[:/<>"\\|?*]`).ReplaceAllString(fileName, "")
@@ -51,27 +51,22 @@ func SanitizeFileName(fileName string) string {
 	return fileName
 }
 
+// GetExtensionNameByMimeType returns extension name that matches the specified mime type
 func GetExtensionNameByMimeType(mimeType string) (string, bool) {
 	extensionName, ok := mimeTypeToExtensionName[mimeType]
 	return extensionName, ok
 }
 
-func stripQueryParam(inUrl string) string {
-	u, err := url.Parse(inUrl)
-	if err != nil {
-		return inUrl
-	}
-	u.RawQuery = ""
-	u.Fragment = ""
-	return u.String()
-}
-
+// GetRemoteFileExtensionName returns the extension name of specified URL
+// Try to determine the file extension name based on the string after the last dot in the URL first,
+// if can not determine the file extension name based on that, an HTTP HEAD request will be sent, then
+// determine the file extension name based on the response Content-type field
 func GetRemoteFileExtensionName(httpClient *http.Client, url string) (string, error) {
-	urlSplitByDot := strings.Split(stripQueryParam(url), ".")
-	lastSegmentOfUrl := urlSplitByDot[len(urlSplitByDot)-1]
-	lastSegmentOfUrl = strings.ToLower(lastSegmentOfUrl)
-	if IsStringSliceContainText(extensionNames, lastSegmentOfUrl) {
-		return lastSegmentOfUrl, nil
+	urlSplitByDot := strings.Split(StripQueryParam(url), ".")
+	lastSegmentOfURL := urlSplitByDot[len(urlSplitByDot)-1]
+	lastSegmentOfURL = strings.ToLower(lastSegmentOfURL)
+	if IsStringSliceContainText(extensionNames, lastSegmentOfURL) {
+		return lastSegmentOfURL, nil
 	}
 	resp, err := httpClient.Head(url)
 	if err != nil {
@@ -81,9 +76,10 @@ func GetRemoteFileExtensionName(httpClient *http.Client, url string) (string, er
 	if extensionName, ok := GetExtensionNameByMimeType(contentType); ok {
 		return extensionName, nil
 	}
-	return "", errors.New(fmt.Sprintf("unknown mimetype: %s", contentType))
+	return "", fmt.Errorf("unknown mimetype: %s", contentType)
 }
 
+// GetRemoteFileSize returns the file size in bytes corresponding to the specified URL
 func GetRemoteFileSize(httpClient *http.Client, url string) (int64, error) {
 	resp, err := httpClient.Head(url)
 	if err != nil {
@@ -92,6 +88,7 @@ func GetRemoteFileSize(httpClient *http.Client, url string) (int64, error) {
 	return resp.ContentLength, nil
 }
 
+// IsPathExist returns true if specified path is exists, otherwise returns false
 func IsPathExist(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
@@ -99,8 +96,7 @@ func IsPathExist(path string) bool {
 	return true
 }
 
-// GetFileSize
-// Return file size in bytes
+// GetFileSize returns file size in bytes
 func GetFileSize(path string) (int64, error) {
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -109,14 +105,18 @@ func GetFileSize(path string) (int64, error) {
 	return stat.Size(), nil
 }
 
+// Mkdir creates a new directory with the specified path and permission 0755
 func Mkdir(path string) error {
 	return os.Mkdir(path, 0755)
 }
 
+// MkdirAll creates directories with the specified path and permission 0755,
+// along with any necessary parents
 func MkdirAll(path string) error {
 	return os.MkdirAll(path, 0755)
 }
 
+// EnsureDir ensures the directory with the specified path is exists
 func EnsureDir(path string) error {
 	if !IsPathExist(path) {
 		if err := Mkdir(path); err != nil {
@@ -126,6 +126,7 @@ func EnsureDir(path string) error {
 	return nil
 }
 
+// EnsureDirAll ensures the directories with the specified path is exists
 func EnsureDirAll(path string) error {
 	if !IsPathExist(path) {
 		if err := MkdirAll(path); err != nil {
@@ -135,6 +136,7 @@ func EnsureDirAll(path string) error {
 	return nil
 }
 
+// GetFileContent returns file content in string
 func GetFileContent(filePath string) (string, error) {
 	if !IsPathExist(filePath) {
 		return "", errors.New("file does not exist")
@@ -146,6 +148,8 @@ func GetFileContent(filePath string) (string, error) {
 	return string(fileBytes), nil
 }
 
+// GetRSSListByTextFile returns http links from specified file path,
+// the text file must contain one RSS link per line
 func GetRSSListByTextFile(filePath string) ([]string, error) {
 	content, err := GetFileContent(filePath)
 	if err != nil {
@@ -157,15 +161,16 @@ func GetRSSListByTextFile(filePath string) ([]string, error) {
 	contentSplit := strings.Split(content, "\n")
 	var lines []string
 	for _, line := range contentSplit {
-		if line != "" && IsValidHttpLink(line) {
+		if line != "" && IsValidHTTPLink(line) {
 			lines = append(lines, line)
 		}
 	}
 	return lines, nil
 }
 
-func WriteFile(content string, dest string) error {
-	out, err := os.Create(dest)
+// WriteContentToFile writes specified content to specified destination file path
+func WriteContentToFile(content string, destFilePath string) error {
+	out, err := os.Create(destFilePath)
 	if err != nil {
 		return err
 	}
