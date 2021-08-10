@@ -34,7 +34,11 @@ var (
 	downloadCmd = &cobra.Command{
 		Use:   "download",
 		Short: "Download podcasts",
-		Run:   download,
+		Long: `Download podcasts
+
+Receiving SIGINT or SIGTERM while downloading will wait until all download tasks have been downloaded before exiting the program.
+`,
+		Run: download,
 	}
 )
 
