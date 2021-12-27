@@ -1,5 +1,10 @@
 package util
 
+import (
+	"strings"
+	"unicode"
+)
+
 // GetFirstNCharacters returns first n characters of string with Chinese support,
 // if giving n is greater than string length will return string directly
 func GetFirstNCharacters(text string, n int) string {
@@ -35,4 +40,14 @@ func RemoveDuplicateItemsInStringSlice(texts []string) (result []string, duplica
 		}
 	}
 	return
+}
+
+// StripInvalidXmlCharacter removes invalid xml characters
+func StripInvalidXmlCharacter(xml string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return -1
+	}, xml)
 }

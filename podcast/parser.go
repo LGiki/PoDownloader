@@ -2,9 +2,11 @@ package podcast
 
 import (
 	"PoDownloader/util"
+	"errors"
 	"github.com/mmcdole/gofeed"
 	"github.com/vbauerster/mpb/v7"
 	"github.com/vbauerster/mpb/v7/decor"
+	"io/ioutil"
 	"net/http"
 	"sync"
 )
@@ -25,7 +27,26 @@ func NewPodcastParser(httpClient *http.Client) *Parser {
 func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 	feed, err := p.ParseURL(RSS)
 	if err != nil {
-		return nil, err
+		httpClient := p.Client
+		if httpClient == nil {
+			return nil, errors.New("failed to get http client")
+		}
+
+		resp, err := httpClient.Get(RSS)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		respBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		feed, err = p.ParseString(util.StripInvalidXmlCharacter(string(respBody)))
+		if err != nil {
+			return nil, err
+		}
 	}
 	var podcastCategories []*Category
 	for _, category := range feed.ITunesExt.Categories {
