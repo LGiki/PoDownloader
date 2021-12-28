@@ -54,7 +54,7 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 
 	// Podcast cover download task
 	var podcastCoverDownloadTask *podownloader.URLDownloadTask = nil
-	if p.ITunesExt.Image != "" {
+	if p.ITunesExt != nil && p.ITunesExt.Image != "" {
 		podcastCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, p.ITunesExt.Image)
 		if err != nil {
 			logger.Println(fmt.Sprintf("Failed to get cover extension name of podcast [%s]: %s", p.Title, p.ITunesExt.Image))
@@ -76,7 +76,7 @@ func (p *Podcast) GetPodcastDownloadTask(destDir string, httpClient *http.Client
 
 		// Cover download task
 		var episodeCoverDownloadTask *podownloader.URLDownloadTask = nil
-		if item.ITunesExt.Image != "" {
+		if item.ITunesExt != nil && item.ITunesExt.Image != "" {
 			episodeCoverExtensionName, err := util.GetRemoteFileExtensionName(httpClient, item.ITunesExt.Image)
 			if err != nil {
 				logger.Println(fmt.Sprintf("Failed to get cover extension name of episode [%s] - [%s]: %s", p.Title, item.Title, item.ITunesExt.Image))

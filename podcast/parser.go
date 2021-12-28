@@ -8,6 +8,7 @@ import (
 	"github.com/vbauerster/mpb/v7/decor"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -49,26 +50,29 @@ func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 		}
 	}
 	var podcastCategories []*Category
-	for _, category := range feed.ITunesExt.Categories {
-		podcastCategory := &Category{
-			Category: category.Text,
+	var iTunesExt *ITunesFeedExtension
+	if feed.ITunesExt != nil {
+		for _, category := range feed.ITunesExt.Categories {
+			podcastCategory := &Category{
+				Category: category.Text,
+			}
+			if category.Subcategory != nil {
+				podcastCategory.SubCategory = category.Subcategory.Text
+			}
+			podcastCategories = append(podcastCategories, podcastCategory)
 		}
-		if category.Subcategory != nil {
-			podcastCategory.SubCategory = category.Subcategory.Text
+		iTunesExt = &ITunesFeedExtension{
+			Author:     feed.ITunesExt.Author,
+			Categories: podcastCategories,
+			Owner: &ITunesOwner{
+				Email: feed.ITunesExt.Owner.Email,
+				Name:  feed.ITunesExt.Owner.Name,
+			},
+			Subtitle: feed.ITunesExt.Subtitle,
+			Summary:  feed.ITunesExt.Summary,
+			Image:    feed.ITunesExt.Image,
+			Explicit: feed.ITunesExt.Explicit,
 		}
-		podcastCategories = append(podcastCategories, podcastCategory)
-	}
-	iTunesExt := &ITunesFeedExtension{
-		Author:     feed.ITunesExt.Author,
-		Categories: podcastCategories,
-		Owner: &ITunesOwner{
-			Email: feed.ITunesExt.Owner.Email,
-			Name:  feed.ITunesExt.Owner.Name,
-		},
-		Subtitle: feed.ITunesExt.Subtitle,
-		Summary:  feed.ITunesExt.Summary,
-		Image:    feed.ITunesExt.Image,
-		Explicit: feed.ITunesExt.Explicit,
 	}
 	var podcastItems []*Item
 	for _, item := range feed.Items {
@@ -80,26 +84,29 @@ func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 				Type:   enclosure.Type,
 			})
 		}
-		podcastItems = append(podcastItems, &Item{
-			Title:       item.Title,
-			SafeTitle:   util.SanitizeFileName(item.Title),
+		newPodcastItem := &Item{
+			Title:       strings.TrimSpace(item.Title),
+			SafeTitle:   util.SanitizeFileName(strings.TrimSpace(item.Title)),
 			Description: item.Description,
 			PubDate:     item.PublishedParsed,
 			GUID:        item.GUID,
 			Enclosures:  enclosures,
-			ITunesExt: &ITunesItemExtension{
+		}
+		if item.ITunesExt != nil {
+			newPodcastItem.ITunesExt = &ITunesItemExtension{
 				Author:   item.ITunesExt.Author,
 				Subtitle: item.ITunesExt.Subtitle,
 				Image:    item.ITunesExt.Image,
 				Duration: item.ITunesExt.Duration,
 				Order:    item.ITunesExt.Order,
-			},
-		})
+			}
+		}
+		podcastItems = append(podcastItems, newPodcastItem)
 	}
 	return &Podcast{
 		RSS:         RSS,
-		Title:       feed.Title,
-		SafeTitle:   util.SanitizeFileName(feed.Title),
+		Title:       strings.TrimSpace(feed.Title),
+		SafeTitle:   util.SanitizeFileName(strings.TrimSpace(feed.Title)),
 		Description: feed.Description,
 		ITunesExt:   iTunesExt,
 		Items:       podcastItems,
