@@ -44,9 +44,6 @@ Receiving SIGINT or SIGTERM while downloading will wait until all download tasks
 
 func init() {
 	cobra.OnInitialize(initConfig, initLogger)
-	httpClient = util.NewHTTPClient(userAgent)
-	podcastParser = podcast.NewPodcastParser(httpClient)
-	rootCmd.AddCommand(downloadCmd)
 
 	// Define download command flags
 	downloadCmd.Flags().StringVarP(&rssListFilePath, "list", "l", "", "Podcast RSS URL collection file path, one podcast RSS URL per line")

@@ -3,7 +3,7 @@ package podownloader
 import (
 	"PoDownloader/logger"
 	"fmt"
-	"github.com/vbauerster/mpb/v7"
+	"github.com/vbauerster/mpb/v8"
 	"net/http"
 	"sync"
 )

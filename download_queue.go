@@ -4,7 +4,7 @@ import (
 	"PoDownloader/logger"
 	"context"
 	"errors"
-	"github.com/vbauerster/mpb/v7"
+	"github.com/vbauerster/mpb/v8"
 	"net/http"
 	"os"
 	"os/signal"
