@@ -71,6 +71,10 @@ func init() {
 	viper.SetDefault("output", "podcast")
 	viper.SetDefault("ua", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36")
 	viper.SetDefault("thread", 3)
+
+	httpClient = util.NewHTTPClient(userAgent)
+	podcastParser = podcast.NewPodcastParser(httpClient, userAgent)
+	rootCmd.AddCommand(downloadCmd)
 }
 
 // getPodcastRSSList returns podcast rss URLs list parsed from OPML file, RSS list file or RSS argument

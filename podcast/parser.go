@@ -18,9 +18,10 @@ type Parser struct {
 }
 
 // NewPodcastParser initializes and returns a Parser instance
-func NewPodcastParser(httpClient *http.Client) *Parser {
+func NewPodcastParser(httpClient *http.Client, userAgent string) *Parser {
 	rssParser := gofeed.NewParser()
 	rssParser.Client = httpClient
+	rssParser.UserAgent = userAgent
 	return &Parser{rssParser}
 }
 
