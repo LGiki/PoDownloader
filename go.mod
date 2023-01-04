@@ -1,6 +1,6 @@
 module PoDownloader
 
-go 1.16
+go 1.19
 
 require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
