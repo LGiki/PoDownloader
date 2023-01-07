@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
+	"os"
 )
 
 // parseOPMLFromBytes parses OPML from bytes slice
@@ -26,7 +27,7 @@ func ParseOPMLFromText(text string) (*OPML, error) {
 // ParseOPMLFromFile parses OPML from specified file path
 // and returns an OPML instance
 func ParseOPMLFromFile(filePath string) (*OPML, error) {
-	bytes, err := ioutil.ReadFile(filePath)
+	bytes, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
