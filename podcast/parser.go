@@ -6,7 +6,7 @@ import (
 	"github.com/mmcdole/gofeed"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -40,7 +40,7 @@ func (p *Parser) ParsePodcastRSS(RSS string) (*Podcast, error) {
 		}
 		defer resp.Body.Close()
 
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}

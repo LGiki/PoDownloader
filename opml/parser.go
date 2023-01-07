@@ -2,7 +2,7 @@ package opml
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -41,7 +41,7 @@ func ParseOPMLFromURL(httpClient *http.Client, url string) (*OPML, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
